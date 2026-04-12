@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class WaveManager : MonoBehaviour
 {
@@ -29,6 +30,10 @@ public class WaveManager : MonoBehaviour
     public bool autoStartNextWave = true;
     public float timeBetweenWaves = 5f;
 
+    [Header("UI")]
+    [SerializeField] TMP_Text waveText;
+    [SerializeField] TMP_Text zombieText;
+
     private int totalZombiesInWave;
     private int zombiesKilled;
     private bool waveInProgress;
@@ -44,6 +49,7 @@ public class WaveManager : MonoBehaviour
         if (waveIndex >= waves.Count)
         {
             Debug.Log("All waves completed!");
+            GameManager.instance.ShowVictoryScreen();
             yield break;
         }
 
@@ -55,6 +61,9 @@ public class WaveManager : MonoBehaviour
 
         foreach (var info in wave.zombiesToSpawn)
             totalZombiesInWave += info.count;
+
+        UpdateWaveUI();
+        UpdateZombieUI();
 
         Debug.Log($"Wave {waveIndex + 1} starting: {wave.waveName}");
         yield return new WaitForSeconds(wave.timeBeforeWave);
@@ -75,7 +84,6 @@ public class WaveManager : MonoBehaviour
         GameObject zombie = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
         activeZombies.Add(zombie);
 
-        // Hook into death
         EnemyHealth health = zombie.GetComponent<EnemyHealth>();
         if (health != null)
             health.onDeath += OnZombieKilled;
@@ -84,6 +92,7 @@ public class WaveManager : MonoBehaviour
     void OnZombieKilled()
     {
         zombiesKilled++;
+        UpdateZombieUI();
         Debug.Log($"Zombies killed: {zombiesKilled}/{totalZombiesInWave}");
 
         if (zombiesKilled >= totalZombiesInWave)
@@ -101,5 +110,17 @@ public class WaveManager : MonoBehaviour
         yield return new WaitForSeconds(timeBetweenWaves);
         currentWaveIndex++;
         StartCoroutine(StartWave(currentWaveIndex));
+    }
+
+    void UpdateWaveUI()
+    {
+        if (waveText != null)
+            waveText.text = "Wave " + (currentWaveIndex + 1) + " / " + waves.Count;
+    }
+
+    void UpdateZombieUI()
+    {
+        if (zombieText != null)
+            zombieText.text = "Zombies: " + (totalZombiesInWave - zombiesKilled) + " / " + totalZombiesInWave;
     }
 }

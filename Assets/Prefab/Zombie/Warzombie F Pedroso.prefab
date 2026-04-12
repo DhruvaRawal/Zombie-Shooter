@@ -897,12 +897,13 @@ MonoBehaviour:
   animator: {fileID: 226532768448820565}
   playerHealth: {fileID: 0}
   detectionRadius: 15
-  attackRange: 3
+  attackRange: 2
   patrolRadius: 20
   attackCooldown: 2
   patrolIdleTime: 3
   rotationSpeed: 7
   attackDuration: 1
+  attackDamage: 10
 --- !u!1 &1825975064019143833
 GameObject:
   m_ObjectHideFlags: 0
