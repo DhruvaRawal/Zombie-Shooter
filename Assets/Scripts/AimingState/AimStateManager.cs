@@ -6,7 +6,7 @@ using System;
 
 public class AimStateManager : MonoBehaviour
 {
-    AimBaseState CurrentState;
+    public AimBaseState CurrentState;
     public HipFireState Hip = new HipFireState();
     public AimState Aim = new AimState();
 

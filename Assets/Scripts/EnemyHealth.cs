@@ -2,7 +2,14 @@ using UnityEngine;
 
 public class EnemyHealth : MonoBehaviour
 {
-    [SerializeField] float health;
+    [SerializeField] public float health;
+    RagdollManager ragdollManager;
+    [HideInInspector] public bool isDead;
+
+    private void Start()
+    {
+        ragdollManager = GetComponent<RagdollManager>();
+    }
 
     public void TakeDamage(float damage)
     {
@@ -10,13 +17,14 @@ public class EnemyHealth : MonoBehaviour
         {
             health -= damage;
             if (health <= 0) EnemyDeath();
-            Debug.Log("Hit");
+            else Debug.Log("Hit");
         }
 
     }
 
     void EnemyDeath()
     {
+        ragdollManager.TriggerRagdoll();
         Debug.Log("Death");
     }
 }

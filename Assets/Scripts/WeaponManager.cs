@@ -1,5 +1,6 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-
 public class WeaponManager : MonoBehaviour
 {
     [Header("Fire Rate")]
@@ -18,11 +19,22 @@ public class WeaponManager : MonoBehaviour
     [SerializeField] AudioClip gunShot;
     AudioSource audioSource;
 
+    [SerializeField] ParticleSystem muzzleFlash;
+    [SerializeField] WFX_LightFlicker muzzleLight;
+
+    WeaponBloom bloom;
+
+    public float enemyKickbackForce = 100;
+
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
         aim = GetComponentInParent<AimStateManager>();
         fireRateTimer = fireRate;
+        bloom = GetComponent<WeaponBloom>();
+        muzzleFlash.Stop(true);
+        muzzleLight.enabled = false;
+        muzzleLight.GetComponent<Light>().enabled = false;
     }
 
     void Update()
@@ -43,6 +55,10 @@ public class WeaponManager : MonoBehaviour
     {
         fireRateTimer = 0;
         barrelPos.LookAt(aim.aimPos);
+        barrelPos.localEulerAngles = bloom.BloomAnngle(barrelPos);
+        muzzleFlash.Play();
+        muzzleLight.enabled = true;
+        StartCoroutine(DisableMuzzleLight());
         audioSource.PlayOneShot(gunShot);
         for (int i = 0; i < bulletsPerShot; i++)
         {
@@ -50,9 +66,18 @@ public class WeaponManager : MonoBehaviour
 
             Bullet bulletScript = currentBullet.GetComponent<Bullet>();
             bulletScript.weapon = this;
+            bulletScript.dir = barrelPos.transform.forward;
 
             Rigidbody rb = currentBullet.GetComponent<Rigidbody>();
             rb.AddForce(barrelPos.forward * bulletVelocity, ForceMode.Impulse);
         }
     }
+
+    IEnumerator DisableMuzzleLight()
+    {
+        yield return new WaitForSeconds(0.1f);
+        muzzleLight.enabled = false;
+        muzzleLight.GetComponent<Light>().enabled = false;
+    }
 }
+
