@@ -15,6 +15,9 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         if (victoryScreen != null) victoryScreen.SetActive(false);
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     public void ShowVictoryScreen()
@@ -28,6 +31,10 @@ public class GameManager : MonoBehaviour
     public void Restart()
     {
         Time.timeScale = 1f;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
