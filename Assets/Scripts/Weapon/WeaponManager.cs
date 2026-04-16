@@ -44,7 +44,7 @@ public class WeaponManager : MonoBehaviour
 
     bool ShouldFire()
     {
-        fireRateTimer += Time.deltaTime;
+        fireRateTimer += Time.unscaledDeltaTime;
         if (fireRateTimer < fireRate) return false;
         if (semiAuto && Input.GetKeyDown(KeyCode.Mouse0)) return true;
         if (!semiAuto && Input.GetKey(KeyCode.Mouse0)) return true;
@@ -75,7 +75,7 @@ public class WeaponManager : MonoBehaviour
 
     IEnumerator DisableMuzzleLight()
     {
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSecondsRealtime(0.1f);
         muzzleLight.enabled = false;
         muzzleLight.GetComponent<Light>().enabled = false;
     }

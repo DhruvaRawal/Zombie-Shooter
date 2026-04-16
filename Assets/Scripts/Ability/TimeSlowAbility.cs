@@ -1,5 +1,7 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using TMPro;
 
 public class TimeSlowAbility : MonoBehaviour
@@ -8,6 +10,10 @@ public class TimeSlowAbility : MonoBehaviour
     [SerializeField] float slowTimeScale = 0.2f;
     [SerializeField] float duration = 5f;
     [SerializeField] float cooldown = 15f;
+
+    [Header("Effects")]
+    [SerializeField] Volume globalVolume;
+    [SerializeField] AudioClip activateSound;
 
     [Header("UI")]
     [SerializeField] TMP_Text abilityText;
@@ -19,10 +25,19 @@ public class TimeSlowAbility : MonoBehaviour
 
     // Store player's original speeds
     MovementStateManager movement;
-
+    Animator playerAnimator;
+    AudioSource audioSource;
+    ColorAdjustments colorAdjustments;
     void Start()
     {
         movement = GetComponent<MovementStateManager>();
+        playerAnimator = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>();
+
+        // Get color adjustments from global volume
+        if (globalVolume != null)
+            globalVolume.profile.TryGet(out colorAdjustments);
+
         UpdateUI();
     }
 
@@ -56,12 +71,23 @@ public class TimeSlowAbility : MonoBehaviour
         Time.fixedDeltaTime = 0.02f * Time.timeScale;
 
         // Make player movement unaffected by using unscaled speeds
+        playerAnimator.updateMode = AnimatorUpdateMode.UnscaledTime;
+
         movement.walkSpeed *= (1f / slowTimeScale);
         movement.walkBackSpeed *= (1f / slowTimeScale);
         movement.runSpeed *= (1f / slowTimeScale);
         movement.runBackSpeed *= (1f / slowTimeScale);
         movement.crouchSpeed *= (1f / slowTimeScale);
         movement.crouchBackSpeed *= (1f / slowTimeScale);
+
+        // Black and white
+        if (colorAdjustments != null)
+            colorAdjustments.saturation.value = -100f;
+
+        // Play sound unscaled
+        if (activateSound != null)
+            audioSource.PlayOneShot(activateSound);
+
     }
 
     void DeactivateAbility()
@@ -73,12 +99,19 @@ public class TimeSlowAbility : MonoBehaviour
         Time.fixedDeltaTime = 0.02f;
 
         // Restore player speeds
+        playerAnimator.updateMode = AnimatorUpdateMode.Normal;
+
         movement.walkSpeed *= slowTimeScale;
         movement.walkBackSpeed *= slowTimeScale;
         movement.runSpeed *= slowTimeScale;
         movement.runBackSpeed *= slowTimeScale;
         movement.crouchSpeed *= slowTimeScale;
         movement.crouchBackSpeed *= slowTimeScale;
+
+        // Restore color
+        if (colorAdjustments != null)
+            colorAdjustments.saturation.value = 0f;
+
     }
 
     void UpdateUI()
